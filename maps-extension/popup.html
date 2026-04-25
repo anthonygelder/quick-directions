@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Quick Directions</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 13px;
+      color: #1a1a1a;
+      width: 300px;
+      padding: 16px;
+      background: #fff;
+    }
+
+    h1 {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    h1 span { font-size: 18px; }
+
+    section { margin-bottom: 18px; }
+
+    label {
+      display: block;
+      font-weight: 500;
+      margin-bottom: 6px;
+      color: #444;
+    }
+
+    .mode-group {
+      display: flex;
+      gap: 6px;
+    }
+
+    .mode-btn {
+      flex: 1;
+      padding: 6px 4px;
+      border: 1.5px solid #d0d0d0;
+      border-radius: 6px;
+      background: #f5f5f5;
+      cursor: pointer;
+      font-size: 18px;
+      text-align: center;
+      transition: border-color 0.15s, background 0.15s;
+    }
+
+    .mode-btn:hover { border-color: #888; background: #eee; }
+    .mode-btn.active { border-color: #1a73e8; background: #e8f0fe; }
+
+    .mode-btn[title]::after {
+      display: none;
+    }
+
+    .location-row {
+      display: grid;
+      grid-template-columns: 80px 1fr 28px;
+      gap: 6px;
+      margin-bottom: 6px;
+      align-items: center;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 5px 8px;
+      border: 1.5px solid #d0d0d0;
+      border-radius: 6px;
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    input[type="text"]:focus { border-color: #1a73e8; }
+
+    .remove-btn {
+      width: 28px;
+      height: 28px;
+      border: none;
+      background: none;
+      cursor: pointer;
+      font-size: 16px;
+      color: #999;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .remove-btn:hover { background: #fee; color: #c00; }
+
+    #add-location {
+      background: none;
+      border: 1.5px dashed #ccc;
+      border-radius: 6px;
+      width: 100%;
+      padding: 5px;
+      cursor: pointer;
+      color: #666;
+      font-size: 12px;
+      margin-top: 4px;
+    }
+
+    #add-location:hover { border-color: #888; color: #333; }
+
+    #save-btn {
+      width: 100%;
+      padding: 8px;
+      background: #1a73e8;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    #save-btn:hover { background: #1558b0; }
+
+    #status {
+      text-align: center;
+      margin-top: 8px;
+      font-size: 12px;
+      color: #188038;
+      min-height: 16px;
+    }
+  </style>
+</head>
+<body>
+  <h1><span>🗺️</span> Quick Directions</h1>
+
+  <section>
+    <label>Default travel mode</label>
+    <div class="mode-group">
+      <button class="mode-btn" data-mode="driving" title="Driving">🚗</button>
+      <button class="mode-btn" data-mode="transit" title="Transit">🚌</button>
+      <button class="mode-btn" data-mode="cycling" title="Cycling">🚴</button>
+      <button class="mode-btn" data-mode="walking" title="Walking">🚶</button>
+    </div>
+  </section>
+
+  <section>
+    <label>Saved locations</label>
+    <div id="locations-list"></div>
+    <button id="add-location">+ Add location</button>
+  </section>
+
+  <button id="save-btn">Save settings</button>
+  <div id="status"></div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
