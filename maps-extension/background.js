@@ -17,6 +17,7 @@ function buildMapsUrl(origin, destination, mode) {
 
 function createMenus(savedLocations) {
   chrome.contextMenus.removeAll(() => {
+    // --- Get directions ---
     chrome.contextMenus.create({
       id: "qd-root",
       title: "Get directions to here",
@@ -38,7 +39,6 @@ function createMenus(savedLocations) {
         type: "separator",
         contexts: ["selection"],
       });
-
       validLocations.forEach((loc, i) => {
         chrome.contextMenus.create({
           id: `qd-saved-${i}`,
@@ -48,16 +48,29 @@ function createMenus(savedLocations) {
         });
       });
     }
+
+    // --- Trip builder ---
+    chrome.contextMenus.create({
+      id: "qd-sep-trip",
+      type: "separator",
+      contexts: ["selection"],
+    });
+
+    chrome.contextMenus.create({
+      id: "qd-add-trip",
+      title: "Add to trip",
+      contexts: ["selection"],
+    });
   });
 }
 
 chrome.runtime.onInstalled.addListener(() => {
+  chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true });
   chrome.storage.sync.get(["savedLocations"], (data) => {
     createMenus(data.savedLocations || []);
   });
 });
 
-// Rebuild menus when settings change
 chrome.storage.onChanged.addListener((changes) => {
   if (changes.savedLocations) {
     createMenus(changes.savedLocations.newValue || []);
@@ -65,8 +78,15 @@ chrome.storage.onChanged.addListener((changes) => {
 });
 
 chrome.contextMenus.onClicked.addListener((info, tab) => {
-  const destination = info.selectionText.trim();
-  if (!destination) return;
+  const text = info.selectionText.trim();
+  if (!text) return;
+
+  if (info.menuItemId === "qd-add-trip") {
+    chrome.storage.local.set({ pendingAddress: text }, () => {
+      chrome.sidePanel.open({ windowId: tab.windowId });
+    });
+    return;
+  }
 
   chrome.storage.sync.get(["savedLocations", "defaultMode"], (data) => {
     const mode = data.defaultMode || "driving";
@@ -77,9 +97,8 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
       const idx = parseInt(info.menuItemId.replace("qd-saved-", ""), 10);
       origin = savedLocations[idx]?.address ?? null;
     }
-    // qd-current: origin stays null, Maps will use browser location
 
-    const url = buildMapsUrl(origin, destination, mode);
+    const url = buildMapsUrl(origin, text, mode);
     chrome.tabs.create({ url });
   });
 });
