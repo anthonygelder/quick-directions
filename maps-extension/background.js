@@ -77,13 +77,46 @@ chrome.storage.onChanged.addListener((changes) => {
   }
 });
 
-chrome.runtime.onMessage.addListener((msg, sender) => {
+chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (msg.type === "ADD_TO_TRIP" && msg.address) {
     chrome.storage.local.set({ pendingAddress: msg.address }, () => {
       chrome.sidePanel.open({ windowId: sender.tab.windowId });
     });
+    return;
+  }
+
+  if (msg.type === "OPTIMIZE_ROUTE") {
+    optimizeWithGoogle(msg.stops, msg.mode, msg.apiKey)
+      .then(sendResponse)
+      .catch((err) => sendResponse({ error: err.message }));
+    return true; // keep channel open for async response
   }
 });
+
+async function optimizeWithGoogle(stops, mode, apiKey) {
+  const MODES = { driving: "driving", transit: "transit", cycling: "bicycling", walking: "walking" };
+  const origin = stops[0].address;
+  const destination = stops[stops.length - 1].address;
+  const middle = stops.slice(1, -1).map((s) => s.address);
+
+  const params = new URLSearchParams({
+    origin,
+    destination,
+    waypoints: `optimize:true|${middle.join("|")}`,
+    mode: MODES[mode] || "driving",
+    key: apiKey,
+  });
+
+  const res = await fetch(`https://maps.googleapis.com/maps/api/directions/json?${params}`);
+  const data = await res.json();
+
+  if (data.status !== "OK") throw new Error(data.status);
+
+  // waypoint_order is the optimized indices into the middle stops array
+  const order = data.routes[0].waypoint_order;
+  const optimizedMiddle = order.map((i) => middle[i]);
+  return { optimizedStops: [origin, ...optimizedMiddle, destination] };
+}
 
 chrome.contextMenus.onClicked.addListener((info, tab) => {
   const text = info.selectionText.trim();

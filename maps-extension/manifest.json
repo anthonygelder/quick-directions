@@ -1,10 +1,16 @@
 {
   "manifest_version": 3,
   "name": "Quick Directions",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Highlight any address for instant directions or build multi-stop trips with route optimization.",
   "permissions": ["contextMenus", "storage", "sidePanel", "tabs"],
-  "host_permissions": ["https://nominatim.openstreetmap.org/"],
+  "host_permissions": [
+    "https://nominatim.openstreetmap.org/",
+    "https://maps.googleapis.com/"
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'; frame-src https://www.google.com"
+  },
   "background": {
     "service_worker": "background.js"
   },
