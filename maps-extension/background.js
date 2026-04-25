@@ -77,6 +77,14 @@ chrome.storage.onChanged.addListener((changes) => {
   }
 });
 
+chrome.runtime.onMessage.addListener((msg, sender) => {
+  if (msg.type === "ADD_TO_TRIP" && msg.address) {
+    chrome.storage.local.set({ pendingAddress: msg.address }, () => {
+      chrome.sidePanel.open({ windowId: sender.tab.windowId });
+    });
+  }
+});
+
 chrome.contextMenus.onClicked.addListener((info, tab) => {
   const text = info.selectionText.trim();
   if (!text) return;
